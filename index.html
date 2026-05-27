@@ -20,23 +20,17 @@ import platform
 import json
 from pathlib import Path
 
-# do not rename
 async def custom_site():
     import embed
-    platform.document.body.style.background = "#7f7f7f"
+    platform.document.body.style.background = "#0a0a0a"
 
     platform.window.transfer.hidden = true
     platform.window.canvas.style.visibility = "visible"
 
-
     bundle = "mrm"
-
-    # the C or js loader could do that but be explicit.
-    appdir = Path(f"/data/data/{bundle}") # /data/data/mrm
+    appdir = Path(f"/data/data/{bundle}")
     appdir.mkdir()
 
-
-    # unpack filesystem from compressed archive into work dir
     if platform.window.location.host.find('.itch.zone')>0:
         import zipfile
         async with platform.fopen("mrm.apk", "rb") as archive:
@@ -49,31 +43,23 @@ async def custom_site():
             tar.extractall(path=appdir.as_posix(), filter='tar')
             tar.close()
 
-    # preloader will change to work dir and prepend it to sys.path
     platform.run_main(PyConfig, loaderhome= appdir / "assets", loadermain=None)
 
-
-    # wait preloading complete : that includes images and wasm compilation of bundled modules
     while embed.counter()<0:
         await asyncio.sleep(.1)
 
     main = appdir / "assets" / "main.py"
 
     if not platform.window.MM.UME:
-
         __import__(__name__).__file__ = main
-
-        msg  = "Ready to start ! Please click/touch page"
+        msg = "Ready to start ! Please click/touch page"
         platform.window.infobox.innerText = msg
         print("\n"*4, f"    * Waiting for media user engagement. {msg} *" , "\n"*4)
-
         while not platform.window.MM.UME:
             await asyncio.sleep(.1)
 
     await TopLevel_async_handler.start_toplevel(platform.shell, console=window.python.config.debug)
-
     __import__(__name__).__file__ = main
-
 
     def ui_callback(pkg):
         platform.window.infobox.innerText = f"installing {pkg}"
@@ -93,12 +79,11 @@ asyncio.run( custom_site() )
 # =============================================================================
 # --></script><head><!--
 //=============================================================================
-
 --><script type="application/javascript">
 // END BLOCK
 
 config = {
-    xtermjs : "1" ,
+    xtermjs : "1",
     _sdl2 : "canvas",
     user_canvas : 0,
     user_canvas_managed : 0,
@@ -110,7 +95,7 @@ config = {
     cdn : "https://pygame-web.github.io/cdn/0.9.3/",
     autorun : 0,
     PYBUILD : "3.12",
-    fb_ar   :  1.77,
+    fb_ar   : 1.77,
     fb_width : "1280",
     fb_height : "720"
 }
@@ -154,9 +139,9 @@ function show_infobox() {
         #progress { display: none; }
         #transfer { display: none; }
 
-        /* ═══════════════════════════════════
+        /* ══════════════════════════════
            PANTALLA DE CARGA
-        ═══════════════════════════════════ */
+        ══════════════════════════════ */
         #infobox {
             position: fixed !important;
             inset: 0 !important;
@@ -171,10 +156,11 @@ function show_infobox() {
             flex-direction: column !important;
             align-items: center !important;
             justify-content: center !important;
-            gap: 0 !important;
+            gap: 36px !important;
             z-index: 999999 !important;
             left: 0 !important;
             top: 0 !important;
+            cursor: pointer;
         }
 
         .mrm-title {
@@ -183,38 +169,29 @@ function show_infobox() {
             letter-spacing: 12px;
             color: #ffffff;
             text-transform: uppercase;
-            margin-bottom: 48px;
         }
 
-        /* Spinner circular */
-        .mrm-spinner {
-            width: 48px;
-            height: 48px;
-            border: 2px solid #222;
-            border-top: 2px solid #ffffff;
-            border-radius: 50%;
-            animation: mrm-spin 0.9s linear infinite;
-            margin-bottom: 28px;
+        #mrm-play-btn {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            opacity: 0.35;
+            transition: opacity 0.3s ease, transform 0.2s ease;
         }
 
-        @keyframes mrm-spin {
-            to { transform: rotate(360deg); }
+        #mrm-play-btn.listo {
+            opacity: 1;
+            animation: mrm-pulse 1.8s ease-in-out infinite;
         }
 
-        /* Barra de progreso */
-        .mrm-bar-wrap {
-            width: 200px;
-            height: 1px;
-            background: #222;
-            margin-bottom: 24px;
-            display: none; /* se muestra cuando pygbag da mensajes reales */
+        #mrm-play-btn.listo:active {
+            transform: scale(0.93);
         }
 
-        .mrm-bar {
-            height: 100%;
-            width: 0%;
-            background: #fff;
-            transition: width 0.4s ease;
+        @keyframes mrm-pulse {
+            0%, 100% { transform: scale(1);    opacity: 1;    }
+            50%       { transform: scale(1.07); opacity: 0.85; }
         }
 
         .mrm-status {
@@ -223,13 +200,11 @@ function show_infobox() {
             color: #444;
             text-transform: uppercase;
             text-align: center;
-            max-width: 260px;
-            line-height: 1.6;
         }
 
-        /* ═══════════════════════════════════
+        /* ══════════════════════════════
            CANVAS
-        ═══════════════════════════════════ */
+        ══════════════════════════════ */
         canvas.emscripten {
             border: 0px none;
             background-color: transparent;
@@ -256,9 +231,9 @@ function show_infobox() {
         .trinfo { position: relative; right: 0px; border: 1px solid black; }
         .framed { position: relative; top: 150px; right: 10px; border: 1px solid black; }
 
-        /* ═══════════════════════════════════
-           CARTEL iOS "AGREGAR A INICIO"
-        ═══════════════════════════════════ */
+        /* ══════════════════════════════
+           CARTEL iOS
+        ══════════════════════════════ */
         #ios-overlay {
             display: none;
             position: fixed;
@@ -267,12 +242,10 @@ function show_infobox() {
             z-index: 9999999;
             align-items: flex-end;
             justify-content: center;
-            padding-bottom: 0;
         }
         #ios-overlay.visible {
             display: flex;
         }
-
         #ios-card {
             background: #1c1c1e;
             border-radius: 20px 20px 0 0;
@@ -284,12 +257,10 @@ function show_infobox() {
             text-align: center;
             animation: ios-slide-up 0.35s cubic-bezier(0.34,1.56,0.64,1);
         }
-
         @keyframes ios-slide-up {
             from { transform: translateY(100%); opacity: 0; }
             to   { transform: translateY(0);    opacity: 1; }
         }
-
         #ios-card .ios-drag {
             width: 36px;
             height: 4px;
@@ -297,23 +268,19 @@ function show_infobox() {
             border-radius: 2px;
             margin: 0 auto 24px;
         }
-
         #ios-card h2 {
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 8px;
             color: #fff;
         }
-
         #ios-card p {
             font-size: 14px;
             color: #aaa;
             line-height: 1.6;
             margin-bottom: 28px;
         }
-
         #ios-card p strong { color: #fff; }
-
         .ios-steps {
             display: flex;
             flex-direction: column;
@@ -321,13 +288,11 @@ function show_infobox() {
             margin-bottom: 28px;
             text-align: left;
         }
-
         .ios-step {
             display: flex;
             align-items: center;
             gap: 14px;
         }
-
         .ios-step-num {
             width: 32px;
             height: 32px;
@@ -341,23 +306,19 @@ function show_infobox() {
             font-weight: 600;
             color: #fff;
         }
-
         .ios-step-text {
             font-size: 14px;
             color: #ccc;
             line-height: 1.4;
         }
-
         .ios-step-text strong { color: #fff; }
-
         .ios-share-icon {
             display: inline-block;
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             vertical-align: middle;
             margin: 0 2px;
         }
-
         #ios-btn-close {
             width: 100%;
             padding: 14px;
@@ -394,14 +355,20 @@ function show_infobox() {
         oncontextmenu="event.preventDefault()" tabindex=1 hidden>
     </canvas>
 
-    <!-- PANTALLA DE CARGA PERSONALIZADA -->
+    <!-- PANTALLA DE CARGA -->
     <div id="infobox">
         <div class="mrm-title">MRM</div>
-        <div class="mrm-spinner"></div>
-        <div class="mrm-bar-wrap" id="mrm-bar-wrap">
-            <div class="mrm-bar" id="mrm-bar"></div>
+        <div id="mrm-play-btn">
+            <svg viewBox="0 0 80 80" width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="40" cy="40" r="38" fill="none" stroke="#2a2a2a" stroke-width="1.5"/>
+                <circle cx="40" cy="40" r="38" fill="none" stroke="#ffffff" stroke-width="1.5"
+                    stroke-dasharray="238.76" stroke-dashoffset="238.76"
+                    id="mrm-progress-ring"
+                    style="transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.5s ease;"/>
+                <polygon points="32,24 32,56 58,40" fill="#ffffff"/>
+            </svg>
         </div>
-        <div class="mrm-status" id="mrm-status">Cargando el juego...</div>
+        <div class="mrm-status" id="mrm-status">Cargando...</div>
     </div>
 
     <div id=html></div>
@@ -467,7 +434,7 @@ function show_infobox() {
                         <svg class="ios-share-icon" viewBox="0 0 24 24" fill="none" stroke="#4a9eff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M8 12H3v9h18v-9h-5"/><path d="M12 3v12"/><path d="M9 6l3-3 3 3"/>
                         </svg>
-                        <strong>Compartir</strong> en Safari (barra de abajo)
+                        <strong>Compartir</strong> en Safari
                     </div>
                 </div>
                 <div class="ios-step">
@@ -476,7 +443,7 @@ function show_infobox() {
                 </div>
                 <div class="ios-step">
                     <div class="ios-step-num">3</div>
-                    <div class="ios-step-text">Abrí el juego desde el ícono nuevo en tu inicio</div>
+                    <div class="ios-step-text">Abrí el juego desde el ícono en tu inicio</div>
                 </div>
             </div>
             <button id="ios-btn-close">Entendido</button>
@@ -529,60 +496,88 @@ function show_infobox() {
         window.frames["iframe"].location = url;
     }
 
-    // ═══════════════════════════════════════════════════
-    // TRADUCCIÓN DE MENSAJES DE PYGBAG AL ESPAÑOL
-    // ═══════════════════════════════════════════════════
+    // ══════════════════════════════════════════
+    // ANILLO DE PROGRESO
+    // ══════════════════════════════════════════
+    var statusEl   = document.getElementById('mrm-status');
+    var playBtn    = document.getElementById('mrm-play-btn');
+    var ring       = document.getElementById('mrm-progress-ring');
+    var loadPct    = 5;
+    var juegoListo = false;
+    var CIRCUNF    = 238.76;
+
+    function setPct(pct) {
+        loadPct = Math.min(pct, 99);
+        ring.style.strokeDashoffset = CIRCUNF - (CIRCUNF * loadPct / 100);
+    }
+    setPct(5);
+
+    var fakeTimer = setInterval(function() {
+        if (loadPct < 72) {
+            setPct(loadPct + Math.random() * 4 + 1);
+        } else {
+            clearInterval(fakeTimer);
+        }
+    }, 700);
+
     var traducciones = {
-        'loading': 'Cargando...',
-        'downloading': 'Descargando archivos del juego...',
-        'ready to start': 'Tocá la pantalla para comenzar',
-        'please click': 'Tocá la pantalla para comenzar',
-        'click/touch': 'Tocá la pantalla para comenzar',
-        'waiting': 'Preparando...',
-        'installing': 'Instalando módulos...',
-        'done': '¡Listo!'
+        'ready to start'  : null,
+        'please click'    : null,
+        'click/touch'     : null,
+        'done'            : null,
+        'downloading'     : 'Descargando...',
+        'loading'         : 'Cargando...',
+        'installing'      : 'Instalando...',
+        'waiting'         : 'Preparando...'
     };
 
-    function traducir(msg) {
-        if (!msg) return '';
-        var lower = msg.toLowerCase();
-        for (var key in traducciones) {
-            if (lower.indexOf(key) >= 0) return traducciones[key];
-        }
-        return msg;
+    function activarBoton() {
+        if (juegoListo) return;
+        juegoListo = true;
+        clearInterval(fakeTimer);
+        ring.style.transition = 'stroke-dashoffset 0.7s ease';
+        setPct(100);
+        ring.style.strokeDashoffset = 0;
+        setTimeout(function() {
+            playBtn.classList.add('listo');
+            statusEl.textContent = 'TOCÁ PARA JUGAR';
+            statusEl.style.color = '#ffffff';
+            statusEl.style.letterSpacing = '4px';
+        }, 700);
     }
 
-    // Observa cambios en el infobox para traducir mensajes de pygbag
-    var statusEl = document.getElementById('mrm-status');
-    var barWrap   = document.getElementById('mrm-bar-wrap');
-    var barEl     = document.getElementById('mrm-bar');
-    var loadPct   = 10;
-
-    var observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(m) {
-            var txt = (document.getElementById('infobox').innerText || '').trim();
-            if (txt && txt !== statusEl.textContent) {
-                statusEl.textContent = traducir(txt);
-                // simula avance de barra cuando llegan mensajes reales
-                if (loadPct < 90) {
-                    loadPct += 20;
-                    barWrap.style.display = 'block';
-                    barEl.style.width = loadPct + '%';
-                }
-            }
+    var observer = new MutationObserver(function() {
+        var txt = '';
+        var nodos = document.getElementById('infobox').childNodes;
+        nodos.forEach(function(n) {
+            if (n.nodeType === 3) txt += n.textContent;
         });
+        txt = txt.trim().toLowerCase();
+        if (!txt) return;
+
+        for (var key in traducciones) {
+            if (txt.indexOf(key) >= 0) {
+                if (traducciones[key] === null) {
+                    activarBoton();
+                } else {
+                    if (!juegoListo) statusEl.textContent = traducciones[key];
+                    if (loadPct < 80) setPct(loadPct + 15);
+                }
+                return;
+            }
+        }
     });
 
     observer.observe(document.getElementById('infobox'), {
         childList: true, subtree: true, characterData: true
     });
 
-    // ═══════════════════════════════════════════════════
+    // ══════════════════════════════════════════
     // FIX ALTURA iOS
-    // ═══════════════════════════════════════════════════
+    // ══════════════════════════════════════════
     function fixIOSHeight() {
-        var canvas = document.getElementById('canvas');
-        if (canvas) canvas.style.height = window.innerHeight + 'px';
+        var c = document.getElementById('canvas');
+        if (c) c.style.height = window.innerHeight + 'px';
     }
     fixIOSHeight();
     window.addEventListener('resize', fixIOSHeight);
@@ -590,15 +585,14 @@ function show_infobox() {
         setTimeout(fixIOSHeight, 300);
     });
 
-    // ═══════════════════════════════════════════════════
-    // DETECCIÓN iOS EN SAFARI (no standalone)
-    // ═══════════════════════════════════════════════════
-    var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    var isSafari = /safari/i.test(navigator.userAgent) && !/chrome|crios|fxios/i.test(navigator.userAgent);
+    // ══════════════════════════════════════════
+    // CARTEL iOS — solo Safari sin standalone
+    // ══════════════════════════════════════════
+    var isIOS       = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    var isSafari    = /safari/i.test(navigator.userAgent) && !/chrome|crios|fxios/i.test(navigator.userAgent);
     var isStandalone = ('standalone' in navigator) && navigator.standalone;
 
     if (isIOS && isSafari && !isStandalone) {
-        // Muestra el cartel a los 2.5 segundos
         setTimeout(function() {
             document.getElementById('ios-overlay').classList.add('visible');
         }, 2500);
@@ -608,15 +602,19 @@ function show_infobox() {
         document.getElementById('ios-overlay').classList.remove('visible');
     });
 
-    // Cierra al tocar fuera del card
     document.getElementById('ios-overlay').addEventListener('click', function(e) {
         if (e.target === this) this.classList.remove('visible');
     });
 
-    // ═══════════════════════════════════════════════════
-    // FULLSCREEN AL PRIMER TOQUE
-    // ═══════════════════════════════════════════════════
-    document.addEventListener('click', function enterFS() {
+    // ══════════════════════════════════════════
+    // GESTO + FULLSCREEN + ARRANQUE AUTOMÁTICO
+    // ══════════════════════════════════════════
+    var gestoDado = false;
+
+    function dispararGesto() {
+        if (gestoDado) return;
+        gestoDado = true;
+
         var el = document.documentElement;
         if (el.requestFullscreen)            el.requestFullscreen();
         else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
@@ -626,7 +624,25 @@ function show_infobox() {
         if (screen.orientation && screen.orientation.lock) {
             screen.orientation.lock('landscape').catch(function(){});
         }
-    }, { once: true });
+
+        setTimeout(function() {
+            var canvas = document.getElementById('canvas');
+            if (canvas) {
+                canvas.dispatchEvent(new MouseEvent('click', {
+                    bubbles: true, cancelable: true, view: window
+                }));
+                try {
+                    canvas.dispatchEvent(new TouchEvent('touchstart', {
+                        bubbles: true, cancelable: true
+                    }));
+                } catch(e) {}
+            }
+        }, 100);
+    }
+
+    ['click', 'touchstart', 'keydown', 'pointerdown'].forEach(function(evt) {
+        document.addEventListener(evt, dispararGesto, { once: true, passive: true });
+    });
 
     </script>
 
