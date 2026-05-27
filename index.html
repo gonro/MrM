@@ -20,14 +20,16 @@ import platform
 import json
 from pathlib import Path
 
+# do not rename
 async def custom_site():
     import embed
     platform.document.body.style.background = "#0a0a0a"
-    
-    platform.window.transfer.hidden = True
+
+    platform.window.transfer.hidden = true
     platform.window.canvas.style.visibility = "visible"
 
     bundle = "mrm"
+
     appdir = Path(f"/data/data/{bundle}")
     appdir.mkdir()
 
@@ -52,13 +54,14 @@ async def custom_site():
 
     if not platform.window.MM.UME:
         __import__(__name__).__file__ = main
-        msg = "Ready to start ! Please click/touch page"
+        msg  = "Ready to start ! Please click/touch page"
         platform.window.infobox.innerText = msg
         print("\n"*4, f"    * Waiting for media user engagement. {msg} *" , "\n"*4)
         while not platform.window.MM.UME:
             await asyncio.sleep(.1)
 
     await TopLevel_async_handler.start_toplevel(platform.shell, console=window.python.config.debug)
+
     __import__(__name__).__file__ = main
 
     def ui_callback(pkg):
@@ -83,7 +86,7 @@ asyncio.run( custom_site() )
 // END BLOCK
 
 config = {
-    xtermjs : "1",
+    xtermjs : "1" ,
     _sdl2 : "canvas",
     user_canvas : 0,
     user_canvas_managed : 0,
@@ -95,7 +98,7 @@ config = {
     cdn : "https://pygame-web.github.io/cdn/0.9.3/",
     autorun : 0,
     PYBUILD : "3.12",
-    fb_ar   : 1.77,
+    fb_ar   :  1.77,
     fb_width : "1280",
     fb_height : "720"
 }
@@ -115,6 +118,9 @@ function show_infobox() {
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 
     <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -125,80 +131,164 @@ function show_infobox() {
         }
 
         body {
-            font-family: arial;
+            font-family: -apple-system, 'Inter', 'Segoe UI', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #0a0a0a;
+            background-color: #000;
             width: 100%;
             height: 100%;
             height: -webkit-fill-available;
             overflow: hidden;
         }
 
-        #status { display: none; }
+        #status   { display: none; }
         #progress { display: none; }
         #transfer { display: none; }
 
+        /* ══════════════════════════════
+           PANTALLA DE CARGA COMPLETA
+        ══════════════════════════════ */
         #infobox {
             position: fixed !important;
             inset: 0 !important;
             width: 100% !important;
             height: 100% !important;
-            background: #0a0a0a !important;
+            background: #000 !important;
             color: #fff !important;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+            font-family: -apple-system, 'Inter', 'Segoe UI', sans-serif !important;
             font-weight: normal !important;
-            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left) !important;
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
             justify-content: center !important;
-            gap: 36px !important;
+            gap: 0 !important;
             z-index: 999999 !important;
-            left: 0 !important;
-            top: 0 !important;
             cursor: pointer;
+            padding: 0 !important;
+        }
+
+        /* Zona central: título + botón */
+        .mrm-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 32px;
+            flex: 1;
+            justify-content: center;
         }
 
         .mrm-title {
-            font-size: 52px;
+            font-size: 58px;
             font-weight: 700;
-            letter-spacing: 12px;
+            letter-spacing: 14px;
             color: #ffffff;
             text-transform: uppercase;
+            font-family: -apple-system, 'Inter', sans-serif;
+            user-select: none;
         }
 
         #mrm-play-btn {
-            position: relative;
             width: 80px;
             height: 80px;
             cursor: pointer;
-            opacity: 0.35;
-            transition: opacity 0.3s ease, transform 0.2s ease;
+            opacity: 0.3;
+            transition: opacity 0.4s ease, transform 0.2s ease;
         }
 
         #mrm-play-btn.listo {
             opacity: 1;
-            animation: mrm-pulse 1.8s ease-in-out infinite;
-        }
-
-        #mrm-play-btn.listo:active {
-            transform: scale(0.93);
+            animation: mrm-pulse 2s ease-in-out infinite;
         }
 
         @keyframes mrm-pulse {
-            0%, 100% { transform: scale(1);    opacity: 1;    }
-            50%       { transform: scale(1.07); opacity: 0.85; }
+            0%, 100% { transform: scale(1);    opacity: 1;   }
+            50%       { transform: scale(1.08); opacity: 0.8; }
         }
 
         .mrm-status {
             font-size: 11px;
             letter-spacing: 3px;
-            color: #444;
+            color: #3a3a3a;
             text-transform: uppercase;
             text-align: center;
+            user-select: none;
+            transition: color 0.5s ease, letter-spacing 0.3s ease;
+            font-weight: 400;
         }
 
+        /* ══════════════════════════════
+           ZONA INFERIOR — demo + plataformas
+        ══════════════════════════════ */
+        .mrm-footer {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 0 24px 48px;
+        }
+
+        /* Separador */
+        .mrm-divider {
+            width: 40px;
+            height: 1px;
+            background: #1e1e1e;
+        }
+
+        /* Texto demo */
+        .mrm-demo-label {
+            font-size: 13px;
+            font-weight: 300;
+            color: #666;
+            letter-spacing: 0.5px;
+            text-align: center;
+            font-family: -apple-system, 'Inter', sans-serif;
+            line-height: 1.5;
+        }
+
+        .mrm-demo-label span {
+            display: block;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: #333;
+            text-transform: uppercase;
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        /* Plataformas */
+        .mrm-platforms {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+
+        .mrm-platform {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            opacity: 0.28;
+            transition: opacity 0.3s;
+        }
+
+        .mrm-platform svg {
+            width: 22px;
+            height: 22px;
+            fill: #ffffff;
+        }
+
+        .mrm-platform-name {
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            color: #555;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* ══════════════════════════════
+           CANVAS
+        ══════════════════════════════ */
         canvas.emscripten {
             border: 0px none;
             background-color: transparent;
@@ -218,31 +308,34 @@ function show_infobox() {
         div.emscripten { text-align: center; }
         div.emscripten_border { border: 1px solid black; }
         div.thick_border { border: 4px solid black; }
-
-        .topright { position: absolute; top: 0px; right: 0px; }
+        .topright    { position: absolute; top: 0px; right: 0px; }
         .bottomright { position: absolute; top: 40%; right: 0px; }
-        .center { display: flex; align-items: center; justify-content: center; }
-        .trinfo { position: relative; right: 0px; border: 1px solid black; }
-        .framed { position: relative; top: 150px; right: 10px; border: 1px solid black; }
+        .center      { display: flex; align-items: center; justify-content: center; }
+        .trinfo      { position: relative; right: 0px; border: 1px solid black; }
+        .framed      { position: relative; top: 150px; right: 10px; border: 1px solid black; }
 
+        /* ══════════════════════════════
+           CARTEL iOS
+        ══════════════════════════════ */
         #ios-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.85);
             z-index: 9999999;
             align-items: flex-end;
             justify-content: center;
         }
         #ios-overlay.visible { display: flex; }
+
         #ios-card {
             background: #1c1c1e;
             border-radius: 20px 20px 0 0;
-            padding: 28px 24px 40px;
+            padding: 28px 24px 44px;
             width: 100%;
             max-width: 480px;
             color: #fff;
-            font-family: -apple-system, 'Segoe UI', sans-serif;
+            font-family: -apple-system, 'Inter', sans-serif;
             text-align: center;
             animation: ios-slide-up 0.35s cubic-bezier(0.34,1.56,0.64,1);
         }
@@ -250,33 +343,35 @@ function show_infobox() {
             from { transform: translateY(100%); opacity: 0; }
             to   { transform: translateY(0);    opacity: 1; }
         }
-        #ios-card .ios-drag {
-            width: 36px; height: 4px; background: #444;
+        .ios-drag {
+            width: 36px; height: 4px; background: #3a3a3c;
             border-radius: 2px; margin: 0 auto 24px;
         }
-        #ios-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #fff; }
-        #ios-card p { font-size: 14px; color: #aaa; line-height: 1.6; margin-bottom: 28px; }
+        #ios-card h2 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+        #ios-card p  { font-size: 14px; color: #8e8e93; line-height: 1.6; margin-bottom: 24px; }
         #ios-card p strong { color: #fff; }
-        .ios-steps { display: flex; flex-direction: column; gap: 16px; margin-bottom: 28px; text-align: left; }
-        .ios-step { display: flex; align-items: center; gap: 14px; }
+        .ios-steps   { display: flex; flex-direction: column; gap: 16px; margin-bottom: 28px; text-align: left; }
+        .ios-step    { display: flex; align-items: center; gap: 14px; }
         .ios-step-num {
-            width: 32px; height: 32px; min-width: 32px; border-radius: 50%;
-            background: #2c2c2e; display: flex; align-items: center;
-            justify-content: center; font-size: 13px; font-weight: 600; color: #fff;
+            width: 32px; height: 32px; min-width: 32px;
+            border-radius: 50%; background: #2c2c2e;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 600;
         }
-        .ios-step-text { font-size: 14px; color: #ccc; line-height: 1.4; }
+        .ios-step-text { font-size: 14px; color: #aeaeb2; line-height: 1.4; }
         .ios-step-text strong { color: #fff; }
-        .ios-share-icon { display: inline-block; width: 18px; height: 18px; vertical-align: middle; margin: 0 2px; }
+        .ios-share-icon { display: inline-block; width: 18px; height: 18px; vertical-align: middle; margin: 0 3px; }
         #ios-btn-close {
-            width: 100%; padding: 14px; background: #2c2c2e; border: none;
-            border-radius: 12px; color: #aaa; font-size: 15px; cursor: pointer; font-family: inherit;
+            width: 100%; padding: 14px;
+            background: #2c2c2e; border: none; border-radius: 12px;
+            color: #8e8e93; font-size: 15px; cursor: pointer;
+            font-family: -apple-system, 'Inter', sans-serif;
         }
     </style>
 
     <script src="https://pygame-web.github.io/cdn/0.9.3//browserfs.min.js"></script>
 
 </head>
-
 <body>
 
     <div id="transfer" align=center>
@@ -296,19 +391,68 @@ function show_infobox() {
         oncontextmenu="event.preventDefault()" tabindex=1 hidden>
     </canvas>
 
+    <!-- ═══════════════════════════════════════
+         PANTALLA DE CARGA
+    ═══════════════════════════════════════ -->
     <div id="infobox">
-        <div class="mrm-title">MRM</div>
-        <div id="mrm-play-btn">
-            <svg viewBox="0 0 80 80" width="80" height="80" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="40" cy="40" r="38" fill="none" stroke="#2a2a2a" stroke-width="1.5"/>
-                <circle cx="40" cy="40" r="38" fill="none" stroke="#ffffff" stroke-width="1.5"
-                    stroke-dasharray="238.76" stroke-dashoffset="238.76"
-                    id="mrm-progress-ring"
-                    style="transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.5s ease;"/>
-                <polygon points="32,24 32,56 58,40" fill="#ffffff"/>
-            </svg>
+
+        <!-- Centro: título + anillo + estado -->
+        <div class="mrm-center">
+            <div class="mrm-title">MRM</div>
+
+            <div id="mrm-play-btn">
+                <svg viewBox="0 0 80 80" width="80" height="80" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="40" cy="40" r="38" fill="none" stroke="#1a1a1a" stroke-width="1.5"/>
+                    <circle cx="40" cy="40" r="38" fill="none" stroke="#ffffff" stroke-width="1.5"
+                        stroke-dasharray="238.76" stroke-dashoffset="238.76"
+                        id="mrm-progress-ring"
+                        style="transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset 0.5s ease;"/>
+                    <polygon points="32,24 32,56 58,40" fill="#ffffff"/>
+                </svg>
+            </div>
+
+            <div class="mrm-status" id="mrm-status">Cargando...</div>
         </div>
-        <div class="mrm-status" id="mrm-status">Cargando...</div>
+
+        <!-- Footer: demo + plataformas -->
+        <div class="mrm-footer">
+
+            <div class="mrm-divider"></div>
+
+            <div class="mrm-demo-label">
+                Estás jugando la versión Demo
+                <span>Próximamente — versión completa</span>
+            </div>
+
+            <div class="mrm-platforms">
+
+                <!-- Apple / iOS -->
+                <div class="mrm-platform">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                    </svg>
+                    <div class="mrm-platform-name">iOS</div>
+                </div>
+
+                <!-- Windows -->
+                <div class="mrm-platform">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 12V6.75l6-1.32v6.57H3zm17-9v8.75h-7V4.68L20 3zM3 13h6v6.43l-6-1.29V13zm17 .25V22l-7-1.23V13.25h7z"/>
+                    </svg>
+                    <div class="mrm-platform-name">Windows</div>
+                </div>
+
+                <!-- Android -->
+                <div class="mrm-platform">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.523 15.341c-.384 0-.697-.313-.697-.697s.313-.697.697-.697.697.313.697.697-.313.697-.697.697zm-11.046 0c-.384 0-.697-.313-.697-.697s.313-.697.697-.697.697.313.697.697-.313.697-.697.697zm11.4-4.637l1.328-2.3a.276.276 0 00-.101-.377.276.276 0 00-.377.101l-1.346 2.331A8.11 8.11 0 0012 9.748a8.11 8.11 0 00-5.381 1.711L5.273 9.128a.276.276 0 00-.377-.101.276.276 0 00-.101.377l1.328 2.3C3.959 12.878 2.5 14.998 2.5 17.5h19c0-2.502-1.459-4.622-3.623-5.796z"/>
+                    </svg>
+                    <div class="mrm-platform-name">Android</div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 
     <div id=html></div>
@@ -335,7 +479,7 @@ function show_infobox() {
             <iframe id="iframe" class="framed" name="iframe"
                 width="470px" height="90%"
                 allowtransparency="true"
-                style="z-index: 10; background: #FFFFFF;"
+                style="z-index:10;background:#FFFFFF;"
                 frameborder="1"
                 allowfullscreen="true" webkitallowfullscreen="true"
                 msallowfullscreen="true" mozallowfullscreen="true"
@@ -356,18 +500,19 @@ function show_infobox() {
         <div id="terminal" tabIndex=1 align="left"></div>
     </div>
 
+    <!-- CARTEL iOS -->
     <div id="ios-overlay">
         <div id="ios-card">
             <div class="ios-drag"></div>
             <h2>Jugá en pantalla completa</h2>
-            <p>En iPhone el navegador no permite pantalla completa.<br>
-            Agregá el juego a tu inicio y abrilo desde ahí.</p>
+            <p>Safari no permite pantalla completa.<br>
+               Agregá el juego a tu inicio y abrilo desde ahí.</p>
             <div class="ios-steps">
                 <div class="ios-step">
                     <div class="ios-step-num">1</div>
                     <div class="ios-step-text">
-                        Tocá el botón
-                        <svg class="ios-share-icon" viewBox="0 0 24 24" fill="none" stroke="#4a9eff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        Tocá
+                        <svg class="ios-share-icon" viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M8 12H3v9h18v-9h-5"/><path d="M12 3v12"/><path d="M9 6l3-3 3 3"/>
                         </svg>
                         <strong>Compartir</strong> en Safari
@@ -379,7 +524,7 @@ function show_infobox() {
                 </div>
                 <div class="ios-step">
                     <div class="ios-step-num">3</div>
-                    <div class="ios-step-text">Abrí el juego desde el ícono en tu inicio</div>
+                    <div class="ios-step-text">Abrí el juego desde el ícono nuevo</div>
                 </div>
             </div>
             <button id="ios-btn-close">Entendido</button>
@@ -429,9 +574,9 @@ function show_infobox() {
     var statusEl   = document.getElementById('mrm-status');
     var playBtn    = document.getElementById('mrm-play-btn');
     var ring       = document.getElementById('mrm-progress-ring');
+    var CIRCUNF    = 238.76;
     var loadPct    = 5;
     var juegoListo = false;
-    var CIRCUNF    = 238.76;
 
     function setPct(pct) {
         loadPct = Math.min(pct, 99);
@@ -440,12 +585,9 @@ function show_infobox() {
     setPct(5);
 
     var fakeTimer = setInterval(function() {
-        if (loadPct < 72) {
-            setPct(loadPct + Math.random() * 4 + 1);
-        } else {
-            clearInterval(fakeTimer);
-        }
-    }, 700);
+        if (loadPct < 70) setPct(loadPct + Math.random() * 3 + 1);
+        else clearInterval(fakeTimer);
+    }, 800);
 
     function activarBoton() {
         if (juegoListo) return;
@@ -464,53 +606,95 @@ function show_infobox() {
     }
 
     var traducciones = {
-        'ready to start' : null,
-        'please click'   : null,
-        'click/touch'    : null,
-        'done'           : null,
-        'downloading'    : 'Descargando...',
-        'loading'        : 'Cargando...',
-        'installing'     : 'Instalando...',
-        'waiting'        : 'Preparando...'
+        'ready'       : null,
+        'click/touch' : null,
+        'please click': null,
+        'downloading' : 'Descargando...',
+        'installing'  : 'Instalando...',
+        'waiting'     : 'Preparando...',
+        'loading'     : 'Cargando...'
     };
 
-    // Observer principal
-    var observer = new MutationObserver(function() {
-        var infobox = document.getElementById('infobox');
-        var txt = (infobox.innerText || infobox.textContent || '').trim().toLowerCase();
+    function revisarTexto() {
+        var el  = document.getElementById('infobox');
+        var txt = (el.innerText || el.textContent || '').toLowerCase().trim();
         if (!txt) return;
         for (var key in traducciones) {
             if (txt.indexOf(key) >= 0) {
                 if (traducciones[key] === null) {
                     activarBoton();
-                } else {
-                    if (!juegoListo) statusEl.textContent = traducciones[key];
-                    if (loadPct < 80) setPct(loadPct + 15);
+                } else if (!juegoListo) {
+                    statusEl.textContent = traducciones[key];
+                    if (loadPct < 80) setPct(loadPct + 12);
                 }
                 return;
             }
         }
-    });
+    }
 
+    var observer = new MutationObserver(revisarTexto);
     observer.observe(document.getElementById('infobox'), {
         childList: true, subtree: true, characterData: true
     });
 
-    // Polling de seguridad cada 1 segundo
     var pollTimer = setInterval(function() {
         if (juegoListo) { clearInterval(pollTimer); return; }
-        var infobox = document.getElementById('infobox');
-        var txt = (infobox.innerText || infobox.textContent || '').trim().toLowerCase();
-        if (txt.indexOf('ready') >= 0 || txt.indexOf('click') >= 0 || txt.indexOf('touch') >= 0) {
-            clearInterval(pollTimer);
-            activarBoton();
-        }
-    }, 1000);
+        revisarTexto();
+    }, 500);
 
-    // Timeout final: si en 45 segundos no arrancó, activa igual
     setTimeout(function() {
         if (!juegoListo) activarBoton();
-    }, 45000);
+    }, 60000);
+
+    // ══════════════════════════════════════════
+    // GESTO: toca/click → fullscreen + arranque
+    // ══════════════════════════════════════════
+    var gestoDado = false;
+
+    function dispararGesto() {
+        if (gestoDado) return;
+        gestoDado = true;
+
+        var el = document.documentElement;
+        if (el.requestFullscreen)            el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
+        else if (el.msRequestFullscreen)     el.msRequestFullscreen();
+
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(function(){});
+        }
+
+        var canvas = document.getElementById('canvas');
+        if (canvas) {
+            canvas.focus();
+            var rect = canvas.getBoundingClientRect();
+            var cx = rect.left + rect.width  / 2;
+            var cy = rect.top  + rect.height / 2;
+
+            ['pointerdown','mousedown','mouseup','click'].forEach(function(tipo) {
+                canvas.dispatchEvent(new PointerEvent(tipo, {
+                    bubbles: true, cancelable: true,
+                    view: window, clientX: cx, clientY: cy,
+                    pointerId: 1, pointerType: 'mouse', isPrimary: true
+                }));
+            });
+
+            try {
+                var touch = new Touch({ identifier: 1, target: canvas, clientX: cx, clientY: cy });
+                canvas.dispatchEvent(new TouchEvent('touchstart', {
+                    bubbles: true, cancelable: true, touches: [touch], changedTouches: [touch]
+                }));
+                canvas.dispatchEvent(new TouchEvent('touchend', {
+                    bubbles: true, cancelable: true, touches: [], changedTouches: [touch]
+                }));
+            } catch(err) {}
+        }
+    }
+
+    ['pointerdown','touchstart','keydown'].forEach(function(evt) {
+        document.addEventListener(evt, dispararGesto, { once: true, passive: true });
+    });
 
     // ══════════════════════════════════════════
     // FIX ALTURA iOS
@@ -533,53 +717,14 @@ function show_infobox() {
     if (isIOS && isSafari && !isStandalone) {
         setTimeout(function() {
             document.getElementById('ios-overlay').classList.add('visible');
-        }, 2500);
+        }, 3000);
     }
 
     document.getElementById('ios-btn-close').addEventListener('click', function() {
         document.getElementById('ios-overlay').classList.remove('visible');
     });
-
     document.getElementById('ios-overlay').addEventListener('click', function(e) {
         if (e.target === this) this.classList.remove('visible');
-    });
-
-    // ══════════════════════════════════════════
-    // GESTO + FULLSCREEN + ARRANQUE
-    // ══════════════════════════════════════════
-    var gestoDado = false;
-
-    function dispararGesto() {
-        if (gestoDado) return;
-        gestoDado = true;
-
-        var el = document.documentElement;
-        if (el.requestFullscreen)            el.requestFullscreen();
-        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-        else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
-        else if (el.msRequestFullscreen)     el.msRequestFullscreen();
-
-        if (screen.orientation && screen.orientation.lock) {
-            screen.orientation.lock('landscape').catch(function(){});
-        }
-
-        setTimeout(function() {
-            var canvas = document.getElementById('canvas');
-            if (canvas) {
-                canvas.dispatchEvent(new MouseEvent('click', {
-                    bubbles: true, cancelable: true, view: window
-                }));
-                try {
-                    canvas.dispatchEvent(new TouchEvent('touchstart', {
-                        bubbles: true, cancelable: true
-                    }));
-                } catch(e) {}
-            }
-        }, 100);
-    }
-
-    ['click', 'touchstart', 'keydown', 'pointerdown'].forEach(function(evt) {
-        document.addEventListener(evt, dispararGesto, { once: true, passive: true });
     });
 
     </script>
