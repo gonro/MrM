@@ -61,7 +61,7 @@ async def custom_site():
     # wait user interaction
     if not platform.window.MM.UME:
         __import__(__name__).__file__ = main
-        msg = "Listo para comenzar. Tocá la pantalla."
+        msg = "Listo para comenzar. Toca la pantalla."
         platform.window.infobox.innerText = msg
         print("\n" * 4, f"    * Esperando interacción del usuario. {msg} *", "\n" * 4)
         while not platform.window.MM.UME:
