@@ -139,9 +139,6 @@ function show_infobox() {
         #progress { display: none; }
         #transfer { display: none; }
 
-        /* ══════════════════════════════
-           PANTALLA DE CARGA
-        ══════════════════════════════ */
         #infobox {
             position: fixed !important;
             inset: 0 !important;
@@ -202,9 +199,6 @@ function show_infobox() {
             text-align: center;
         }
 
-        /* ══════════════════════════════
-           CANVAS
-        ══════════════════════════════ */
         canvas.emscripten {
             border: 0px none;
             background-color: transparent;
@@ -231,9 +225,6 @@ function show_infobox() {
         .trinfo { position: relative; right: 0px; border: 1px solid black; }
         .framed { position: relative; top: 150px; right: 10px; border: 1px solid black; }
 
-        /* ══════════════════════════════
-           CARTEL iOS
-        ══════════════════════════════ */
         #ios-overlay {
             display: none;
             position: fixed;
@@ -243,9 +234,7 @@ function show_infobox() {
             align-items: flex-end;
             justify-content: center;
         }
-        #ios-overlay.visible {
-            display: flex;
-        }
+        #ios-overlay.visible { display: flex; }
         #ios-card {
             background: #1c1c1e;
             border-radius: 20px 20px 0 0;
@@ -262,73 +251,25 @@ function show_infobox() {
             to   { transform: translateY(0);    opacity: 1; }
         }
         #ios-card .ios-drag {
-            width: 36px;
-            height: 4px;
-            background: #444;
-            border-radius: 2px;
-            margin: 0 auto 24px;
+            width: 36px; height: 4px; background: #444;
+            border-radius: 2px; margin: 0 auto 24px;
         }
-        #ios-card h2 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #fff;
-        }
-        #ios-card p {
-            font-size: 14px;
-            color: #aaa;
-            line-height: 1.6;
-            margin-bottom: 28px;
-        }
+        #ios-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #fff; }
+        #ios-card p { font-size: 14px; color: #aaa; line-height: 1.6; margin-bottom: 28px; }
         #ios-card p strong { color: #fff; }
-        .ios-steps {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            margin-bottom: 28px;
-            text-align: left;
-        }
-        .ios-step {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
+        .ios-steps { display: flex; flex-direction: column; gap: 16px; margin-bottom: 28px; text-align: left; }
+        .ios-step { display: flex; align-items: center; gap: 14px; }
         .ios-step-num {
-            width: 32px;
-            height: 32px;
-            min-width: 32px;
-            border-radius: 50%;
-            background: #2c2c2e;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 600;
-            color: #fff;
+            width: 32px; height: 32px; min-width: 32px; border-radius: 50%;
+            background: #2c2c2e; display: flex; align-items: center;
+            justify-content: center; font-size: 13px; font-weight: 600; color: #fff;
         }
-        .ios-step-text {
-            font-size: 14px;
-            color: #ccc;
-            line-height: 1.4;
-        }
+        .ios-step-text { font-size: 14px; color: #ccc; line-height: 1.4; }
         .ios-step-text strong { color: #fff; }
-        .ios-share-icon {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            vertical-align: middle;
-            margin: 0 2px;
-        }
+        .ios-share-icon { display: inline-block; width: 18px; height: 18px; vertical-align: middle; margin: 0 2px; }
         #ios-btn-close {
-            width: 100%;
-            padding: 14px;
-            background: #2c2c2e;
-            border: none;
-            border-radius: 12px;
-            color: #aaa;
-            font-size: 15px;
-            cursor: pointer;
-            font-family: inherit;
+            width: 100%; padding: 14px; background: #2c2c2e; border: none;
+            border-radius: 12px; color: #aaa; font-size: 15px; cursor: pointer; font-family: inherit;
         }
     </style>
 
@@ -355,7 +296,6 @@ function show_infobox() {
         oncontextmenu="event.preventDefault()" tabindex=1 hidden>
     </canvas>
 
-    <!-- PANTALLA DE CARGA -->
     <div id="infobox">
         <div class="mrm-title">MRM</div>
         <div id="mrm-play-btn">
@@ -390,7 +330,6 @@ function show_infobox() {
             <div id="level">(battery level unknown)</div>
             <div id="stateBattery">(charging state unknown)</div>
         </div>
-
         <div id=box class="emscripten_border" hidden=true>
             <div id="info" class="trinfo"></div>
             <iframe id="iframe" class="framed" name="iframe"
@@ -398,10 +337,8 @@ function show_infobox() {
                 allowtransparency="true"
                 style="z-index: 10; background: #FFFFFF;"
                 frameborder="1"
-                allowfullscreen="true"
-                webkitallowfullscreen="true"
-                msallowfullscreen="true"
-                mozallowfullscreen="true"
+                allowfullscreen="true" webkitallowfullscreen="true"
+                msallowfullscreen="true" mozallowfullscreen="true"
                 sandbox="allow-same-origin allow-top-navigation allow-scripts allow-pointer-lock"
                 allow="autoplay; fullscreen *; geolocation; microphone; camera; midi; monetization; xr-spatial-tracking; gamepad; gyroscope; accelerometer; xr; cross-origin-isolated"
                 src="https://pygame-web.github.io/cdn/0.9.3/empty.html"
@@ -419,7 +356,6 @@ function show_infobox() {
         <div id="terminal" tabIndex=1 align="left"></div>
     </div>
 
-    <!-- CARTEL iOS -->
     <div id="ios-overlay">
         <div id="ios-card">
             <div class="ios-drag"></div>
@@ -466,13 +402,8 @@ function show_infobox() {
         show_infobox()
     }
 
-    function custom_prerun(){
-        console.log(__FILE__, "custom_prerun")
-    }
-
-    function custom_postrun(){
-        console.log(__FILE__, "custom_postrun")
-    }
+    function custom_prerun(){ console.log(__FILE__, "custom_prerun") }
+    function custom_postrun(){ console.log(__FILE__, "custom_postrun") }
 
     function debug() {
         python.config.debug = true
@@ -481,20 +412,16 @@ function show_infobox() {
         window_resize()
     }
 
-    function info_inline(data){
-        document.getElementById("info").innerHTML = data
-    }
+    function info_inline(data){ document.getElementById("info").innerHTML = data }
 
     function info_online(url) {
         fetch(url)
-            .then((response) => response.text())
+            .then((r) => r.text())
             .then((html) => { info_inline(html); })
-            .catch((error) => { console.warn(error); });
+            .catch((e) => { console.warn(e); });
     }
 
-    function frame_online(url) {
-        window.frames["iframe"].location = url;
-    }
+    function frame_online(url) { window.frames["iframe"].location = url; }
 
     // ══════════════════════════════════════════
     // ANILLO DE PROGRESO
@@ -520,41 +447,38 @@ function show_infobox() {
         }
     }, 700);
 
-    var traducciones = {
-        'ready to start'  : null,
-        'please click'    : null,
-        'click/touch'     : null,
-        'done'            : null,
-        'downloading'     : 'Descargando...',
-        'loading'         : 'Cargando...',
-        'installing'      : 'Instalando...',
-        'waiting'         : 'Preparando...'
-    };
-
     function activarBoton() {
         if (juegoListo) return;
         juegoListo = true;
         clearInterval(fakeTimer);
+        clearInterval(pollTimer);
         ring.style.transition = 'stroke-dashoffset 0.7s ease';
-        setPct(100);
         ring.style.strokeDashoffset = 0;
         setTimeout(function() {
             playBtn.classList.add('listo');
-            statusEl.textContent = 'TOCÁ PARA JUGAR';
+            var esMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent);
+            statusEl.textContent = esMobile ? 'TOCÁ PARA JUGAR' : 'HACÉ CLIC PARA JUGAR';
             statusEl.style.color = '#ffffff';
             statusEl.style.letterSpacing = '4px';
         }, 700);
     }
 
-    var observer = new MutationObserver(function() {
-        var txt = '';
-        var nodos = document.getElementById('infobox').childNodes;
-        nodos.forEach(function(n) {
-            if (n.nodeType === 3) txt += n.textContent;
-        });
-        txt = txt.trim().toLowerCase();
-        if (!txt) return;
+    var traducciones = {
+        'ready to start' : null,
+        'please click'   : null,
+        'click/touch'    : null,
+        'done'           : null,
+        'downloading'    : 'Descargando...',
+        'loading'        : 'Cargando...',
+        'installing'     : 'Instalando...',
+        'waiting'        : 'Preparando...'
+    };
 
+    // Observer principal
+    var observer = new MutationObserver(function() {
+        var infobox = document.getElementById('infobox');
+        var txt = (infobox.innerText || infobox.textContent || '').trim().toLowerCase();
+        if (!txt) return;
         for (var key in traducciones) {
             if (txt.indexOf(key) >= 0) {
                 if (traducciones[key] === null) {
@@ -572,6 +496,22 @@ function show_infobox() {
         childList: true, subtree: true, characterData: true
     });
 
+    // Polling de seguridad cada 1 segundo
+    var pollTimer = setInterval(function() {
+        if (juegoListo) { clearInterval(pollTimer); return; }
+        var infobox = document.getElementById('infobox');
+        var txt = (infobox.innerText || infobox.textContent || '').trim().toLowerCase();
+        if (txt.indexOf('ready') >= 0 || txt.indexOf('click') >= 0 || txt.indexOf('touch') >= 0) {
+            clearInterval(pollTimer);
+            activarBoton();
+        }
+    }, 1000);
+
+    // Timeout final: si en 45 segundos no arrancó, activa igual
+    setTimeout(function() {
+        if (!juegoListo) activarBoton();
+    }, 45000);
+
     // ══════════════════════════════════════════
     // FIX ALTURA iOS
     // ══════════════════════════════════════════
@@ -581,15 +521,13 @@ function show_infobox() {
     }
     fixIOSHeight();
     window.addEventListener('resize', fixIOSHeight);
-    window.addEventListener('orientationchange', function() {
-        setTimeout(fixIOSHeight, 300);
-    });
+    window.addEventListener('orientationchange', function() { setTimeout(fixIOSHeight, 300); });
 
     // ══════════════════════════════════════════
-    // CARTEL iOS — solo Safari sin standalone
+    // CARTEL iOS
     // ══════════════════════════════════════════
-    var isIOS       = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    var isSafari    = /safari/i.test(navigator.userAgent) && !/chrome|crios|fxios/i.test(navigator.userAgent);
+    var isIOS        = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    var isSafari     = /safari/i.test(navigator.userAgent) && !/chrome|crios|fxios/i.test(navigator.userAgent);
     var isStandalone = ('standalone' in navigator) && navigator.standalone;
 
     if (isIOS && isSafari && !isStandalone) {
@@ -607,7 +545,7 @@ function show_infobox() {
     });
 
     // ══════════════════════════════════════════
-    // GESTO + FULLSCREEN + ARRANQUE AUTOMÁTICO
+    // GESTO + FULLSCREEN + ARRANQUE
     // ══════════════════════════════════════════
     var gestoDado = false;
 
