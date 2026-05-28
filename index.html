@@ -419,6 +419,69 @@ canvas.emscripten {
     cursor: pointer;
 }
 
+
+/* ══════════════════════════════════════════════════════
+   ROTATE OVERLAY — solo en portrait en mobile
+   Se muestra encima de todo cuando el dispositivo está
+   vertical. Desaparece al rotar a landscape.
+   En PC nunca aparece (media query con pointer:coarse).
+══════════════════════════════════════════════════════ */
+#rotate-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999998;
+    background: #000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+}
+
+/* Solo activar en dispositivos táctiles (mobile/tablet) */
+@media (pointer: coarse) and (orientation: portrait) {
+    #rotate-overlay {
+        display: flex;
+    }
+}
+
+.rotate-icon {
+    width: 72px;
+    height: 72px;
+    animation: rotateHint 2s ease-in-out infinite;
+}
+
+@keyframes rotateHint {
+    0%   { transform: rotate(0deg);   }
+    30%  { transform: rotate(-90deg); }
+    60%  { transform: rotate(-90deg); }
+    100% { transform: rotate(0deg);   }
+}
+
+.rotate-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 2px;
+    text-align: center;
+}
+
+.rotate-sub {
+    font-size: 13px;
+    color: #555;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.rotate-mrm {
+    font-size: 11px;
+    color: #2a2a2a;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-top: 16px;
+}
+
 </style>
 
 <script>
@@ -450,14 +513,30 @@ config = {
    Esto libera TODOS los AudioContext de la página,
    incluido el que crea internamente pygame/SDL.
 ─────────────────────────────────────────────────────── */
+/* ── Audio unlock ──────────────────────────────────────
+   Safari + Chrome Android bloquean AudioContext hasta
+   gesto del usuario. Safari además requiere que el
+   contexto sea creado O resumido dentro del handler.
+
+   Estrategia:
+   1. Crear un contexto propio y reproducir silencio
+      (desbloquea la política del browser).
+   2. Parchear AudioContext para que cualquier instancia
+      futura (la de pygame/SDL) nazca en estado running.
+   3. Intentar resumir cualquier AudioContext ya existente
+      en la página con un intervalo corto.
+─────────────────────────────────────────────────────── */
 var _audioUnlocked = false;
+var _unlockInterval = null;
 
 function unlockAudio() {
     if (_audioUnlocked) return;
-    _audioUnlocked = true;
+
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) { _audioUnlocked = true; return; }
+
     try {
-        var AC  = window.AudioContext || window.webkitAudioContext;
-        if (!AC) return;
+        /* 1. Reproducir buffer de silencio — desbloquea la política */
         var ctx = new AC();
         var buf = ctx.createBuffer(1, 1, 22050);
         var src = ctx.createBufferSource();
@@ -465,7 +544,54 @@ function unlockAudio() {
         src.connect(ctx.destination);
         src.start ? src.start(0) : src.noteOn(0);
         if (ctx.state === "suspended") ctx.resume();
-    } catch (e) {}
+    } catch(e) {}
+
+    try {
+        /* 2. Parchear el constructor para que instancias futuras
+              (pygame/SDL las crea después) ya nazcan desbloqueadas.
+              Safari respeta este patrón. */
+        var OrigAC = window.AudioContext || window.webkitAudioContext;
+        var PatchedAC = function() {
+            var instance = new OrigAC();
+            if (instance.state === "suspended") {
+                instance.resume().catch(function(){});
+            }
+            return instance;
+        };
+        PatchedAC.prototype = OrigAC.prototype;
+        if (window.AudioContext)       window.AudioContext       = PatchedAC;
+        if (window.webkitAudioContext) window.webkitAudioContext = PatchedAC;
+    } catch(e) {}
+
+    /* 3. Intervalo que persiste resumiendo cualquier contexto
+          que pygame/SDL haya creado antes o después del gesto.
+          Se detiene cuando confirma al menos uno en "running". */
+    var attempts = 0;
+    _unlockInterval = setInterval(function() {
+        attempts++;
+        var allRunning = true;
+        try {
+            /* SDL/Emscripten expone el contexto en Module o en globals */
+            var candidates = [
+                window.SDL && window.SDL.audioContext,
+                window.Module && window.Module.SDL2 && window.Module.SDL2.audioContext,
+                window._sdlAudioContext
+            ];
+            for (var i = 0; i < candidates.length; i++) {
+                var c = candidates[i];
+                if (c && c.state === "suspended") {
+                    c.resume().catch(function(){});
+                    allRunning = false;
+                }
+            }
+        } catch(e) {}
+
+        /* Parar si ya todo corre o tras 15 segundos */
+        if ((allRunning && attempts > 3) || attempts > 150) {
+            clearInterval(_unlockInterval);
+            _audioUnlocked = true;
+        }
+    }, 100);
 }
 
 /* ── Fullscreen ────────────────────────────────────────
@@ -701,6 +827,36 @@ window.addEventListener("load", function () {
 </div>
 
 <script src="https://pygame-web.github.io/cdn/0.9.3/browserfs.min.js"></script>
+
+
+<!-- ══════════════════════════════════════════════════════
+     ROTATE OVERLAY — girar el teléfono
+══════════════════════════════════════════════════════ -->
+<div id="rotate-overlay">
+
+    <!-- Ícono de teléfono rotando (SVG inline, sin dependencias) -->
+    <svg class="rotate-icon" viewBox="0 0 72 72" fill="none"
+         xmlns="http://www.w3.org/2000/svg">
+        <!-- Teléfono -->
+        <rect x="22" y="8" width="28" height="48" rx="5"
+              stroke="white" stroke-width="2.5" fill="none"/>
+        <circle cx="36" cy="50" r="2.5" fill="white"/>
+        <!-- Flecha de rotación -->
+        <path d="M14 36 A22 22 0 0 1 58 36"
+              stroke="#ffffff" stroke-width="2.5"
+              stroke-linecap="round" fill="none"
+              stroke-dasharray="6 4"/>
+        <polyline points="54,28 58,36 50,37"
+                  stroke="white" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  fill="none"/>
+    </svg>
+
+    <div class="rotate-title">Girá el teléfono</div>
+    <div class="rotate-sub">El juego requiere landscape</div>
+    <div class="rotate-mrm">MRM — Interactive Entertainment</div>
+
+</div>
 
 </body>
 </html>
