@@ -18,6 +18,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <link rel="icon" href="favicon.png">
+<link rel="manifest" href="manifest.json">
 
 <script
     src="https://pygame-web.github.io/cdn/0.9.3/pythons.js"
@@ -422,154 +423,90 @@ canvas.emscripten {
 
 <script>
 
+/* ── Pygbag config ─────────────────────────────────── */
 config = {
-    xtermjs          : "0",
-    _sdl2            : "canvas",
-    user_canvas      : 0,
+    xtermjs             : "0",
+    _sdl2               : "canvas",
+    user_canvas         : 0,
     user_canvas_managed : 0,
-    gui_divider      : 1,
-    ume_block        : 0,
-    can_close        : 0,
-    archive          : "mrm",
-    gui_debug        : 0,
-    cdn              : "https://pygame-web.github.io/cdn/0.9.3/",
-    autorun          : 1,
-    PYBUILD          : "3.12",
-    fb_ar            : 1.77,
-    fb_width         : "1280",
-    fb_height        : "720"
+    gui_divider         : 1,
+    ume_block           : 0,
+    can_close           : 0,
+    archive             : "mrm",
+    gui_debug           : 0,
+    cdn                 : "https://pygame-web.github.io/cdn/0.9.3/",
+    autorun             : 1,
+    PYBUILD             : "3.12",
+    fb_ar               : 1.77,
+    fb_width            : "1280",
+    fb_height           : "720"
 };
 
-/* ─────────────────────────────────────────────────────────
-   AUDIO UNLOCK
-   Chrome Android suspende el AudioContext hasta que hay
-   un gesto del usuario. Este unlock crea un contexto
-   propio y lo resume, lo que desbloquea TODOS los
-   AudioContext de la página (incluido el de pygame/SDL).
-───────────────────────────────────────────────────────── */
+/* ── Audio unlock ──────────────────────────────────────
+   Chrome / Samsung Internet suspenden el AudioContext
+   hasta recibir un gesto real del usuario.
+   Crear un buffer de silencio y llamar .start(0) es el
+   mecanismo oficial para desbloquear la política de audio.
+   Esto libera TODOS los AudioContext de la página,
+   incluido el que crea internamente pygame/SDL.
+─────────────────────────────────────────────────────── */
 var _audioUnlocked = false;
 
 function unlockAudio() {
     if (_audioUnlocked) return;
     _audioUnlocked = true;
-
     try {
-        var AC = window.AudioContext || window.webkitAudioContext;
+        var AC  = window.AudioContext || window.webkitAudioContext;
         if (!AC) return;
-
         var ctx = new AC();
-
-        /* Reproducir un buffer de silencio de 0.001s */
         var buf = ctx.createBuffer(1, 1, 22050);
         var src = ctx.createBufferSource();
         src.buffer = buf;
         src.connect(ctx.destination);
-
-        /* start() es lo que realmente desbloquea la política */
-        if (src.start) {
-            src.start(0);
-        } else if (src.noteOn) {
-            src.noteOn(0);
-        }
-
-        /* Resume por si el contexto quedó suspended */
-        if (ctx.state === "suspended" && ctx.resume) {
-            ctx.resume();
-        }
-
-        /* También intentar resumir cualquier AudioContext
-           que pygame/SDL haya creado antes del gesto */
-        setTimeout(function() {
-            var allCtx = window._audioContexts || [];
-            for (var i = 0; i < allCtx.length; i++) {
-                if (allCtx[i] && allCtx[i].state === "suspended") {
-                    allCtx[i].resume();
-                }
-            }
-        }, 100);
-
-    } catch(e) {}
+        src.start ? src.start(0) : src.noteOn(0);
+        if (ctx.state === "suspended") ctx.resume();
+    } catch (e) {}
 }
 
-/* ─────────────────────────────────────────────────────────
-   FULLSCREEN + LANDSCAPE
-   En Android Chrome hay que:
-   1. Llamar requestFullscreen() sincrónicamente en el gesto.
-   2. Esperar que la Promise resuelva (el fullscreen entra).
-   3. Recién AHÍ llamar screen.orientation.lock("landscape").
-   Si los dos se llaman al mismo tiempo el lock falla
-   porque el documento todavía no está en fullscreen.
-───────────────────────────────────────────────────────── */
-function lockLandscape() {
-    try {
-        if (screen.orientation && typeof screen.orientation.lock === "function") {
-            screen.orientation.lock("landscape-primary").catch(function() {
-                /* fallback al alias genérico */
-                screen.orientation.lock("landscape").catch(function(){});
-            });
-            return;
-        }
-        /* APIs legacy (Samsung Internet < 7, WebView viejo) */
-        var fn = screen.lockOrientation
-               || screen.mozLockOrientation
-               || screen.msLockOrientation;
-        if (fn) fn.call(screen, "landscape");
-    } catch(e) {}
-}
-
+/* ── Fullscreen ────────────────────────────────────────
+   El manifest.json ya declara display:fullscreen y
+   orientation:landscape. Este JS es solo el fallback
+   para cuando el usuario no instaló la PWA.
+   Sin lockOrientation desde JS — el manifest lo maneja
+   y llamarlo desde JS puede pelear con él.
+─────────────────────────────────────────────────────── */
 function enterFullscreen() {
     var el = document.documentElement;
-    var p;
-
-    if      (el.requestFullscreen)       p = el.requestFullscreen({ navigationUI: "hide" });
-    else if (el.webkitRequestFullscreen) p = el.webkitRequestFullscreen();
-    else if (el.mozRequestFullScreen)    p = el.mozRequestFullScreen();
-    else if (el.msRequestFullscreen)     p = el.msRequestFullscreen();
-
-    if (p && typeof p.then === "function") {
-        /* Esperar que entre el fullscreen y DESPUÉS rotar */
-        p.then(function() {
-            lockLandscape();
-        }).catch(function() {
-            /* Si fullscreen fue rechazado intentamos rotar igual
-               (ej: ya estaba en fullscreen, o el browser lo permite
-               sin fullscreen en algunos Samsung Internet) */
-            lockLandscape();
-        });
-    } else {
-        /* API síncrona (Safari iOS / browsers viejos) */
-        lockLandscape();
-    }
+    try {
+        if      (el.requestFullscreen)       el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
+        else if (el.msRequestFullscreen)     el.msRequestFullscreen();
+    } catch (e) {}
 }
 
-/* ─────────────────────────────────────────────────────────
-   FIX ALTURA REAL (iOS Safari — barra inferior)
-───────────────────────────────────────────────────────── */
+/* ── Fix altura real iOS (barra inferior Safari) ────── */
 function fixHeight() {
     var c = document.getElementById("canvas");
     if (c) c.style.height = window.innerHeight + "px";
 }
 fixHeight();
-window.addEventListener("resize", fixHeight);
-window.addEventListener("orientationchange", function() { setTimeout(fixHeight, 350); });
+window.addEventListener("resize",            fixHeight);
+window.addEventListener("orientationchange", function () { setTimeout(fixHeight, 350); });
 
-/* ─────────────────────────────────────────────────────────
-   PRIMER GESTO
-   Se usa capture:true para interceptar el evento ANTES
-   de que pase por el árbol del DOM, garantizando que
-   sea un "trusted user gesture" en Android Chrome.
-   unlockAudio() y enterFullscreen() se llaman síncronos
-   dentro del handler para que los permisos sean válidos.
-───────────────────────────────────────────────────────── */
+/* ── Primer gesto del usuario ──────────────────────────
+   capture:true garantiza que sea un trusted-gesture
+   en Android Chrome. unlockAudio y enterFullscreen
+   se llaman de forma completamente síncrona.
+─────────────────────────────────────────────────────── */
 var _gestoDado = false;
 
 function onFirstGesture() {
     if (_gestoDado) return;
     _gestoDado = true;
 
-    unlockAudio();      /* síncrono — desbloquea AudioContext */
-    enterFullscreen();  /* síncrono — dispara fullscreen,
-                           luego landscape en la Promise      */
+    unlockAudio();
+    enterFullscreen();
 
     var ov = document.getElementById("ios-overlay");
     if (ov) ov.classList.remove("visible");
@@ -583,9 +520,7 @@ document.addEventListener("pointerdown", onFirstGesture, true);
 document.addEventListener("touchstart",  onFirstGesture, { capture: true, passive: true });
 document.addEventListener("keydown",     onFirstGesture, true);
 
-/* ─────────────────────────────────────────────────────────
-   LOADER — funciones llamadas desde Python
-───────────────────────────────────────────────────────── */
+/* ── Loader — funciones llamadas desde Python ──────── */
 function updateLoaderText(txt) {
     var el = document.getElementById("mrm-status");
     if (!el) return;
@@ -602,11 +537,8 @@ function updateLoaderText(txt) {
     };
     for (var key in map) {
         if (lower.indexOf(key) >= 0) {
-            if (map[key] === null) {
-                activateReady();
-            } else {
-                el.textContent = map[key];
-            }
+            if (map[key] === null) { activateReady(); }
+            else                  { el.textContent = map[key]; }
             return;
         }
     }
@@ -616,9 +548,9 @@ function updateLoaderText(txt) {
 function hideLoader() {
     var loader = document.getElementById("mrm-loader");
     if (!loader) return;
-    loader.style.opacity = "0";
+    loader.style.opacity    = "0";
     loader.style.transition = "opacity 0.7s ease";
-    setTimeout(function() { loader.remove(); }, 700);
+    setTimeout(function () { loader.remove(); }, 700);
 }
 
 var _isReady = false;
@@ -626,26 +558,23 @@ var _isReady = false;
 function activateReady() {
     if (_isReady) return;
     _isReady = true;
-    var el = document.getElementById("mrm-status");
+    var el       = document.getElementById("mrm-status");
     if (!el) return;
     var isMobile = /iphone|ipad|ipod|android/i.test(navigator.userAgent);
     el.textContent = isMobile ? "TOCÁ PARA JUGAR" : "HACÉ CLIC PARA JUGAR";
     el.classList.add("ready");
 }
 
-/* Fallback por si pygbag no llama updateLoaderText */
-setTimeout(function() { if (!_isReady) activateReady(); }, 45000);
+setTimeout(function () { if (!_isReady) activateReady(); }, 45000);
 
-/* ─────────────────────────────────────────────────────────
-   OVERLAY iOS — solo en Safari sin standalone
-───────────────────────────────────────────────────────── */
-window.addEventListener("load", function() {
+/* ── Overlay iOS ───────────────────────────────────── */
+window.addEventListener("load", function () {
     var isIOS      = /iphone|ipad|ipod/i.test(navigator.userAgent);
     var isSafari   = /safari/i.test(navigator.userAgent)
                   && !/chrome|crios|fxios/i.test(navigator.userAgent);
     var standalone = ("standalone" in navigator) && navigator.standalone;
     if (isIOS && isSafari && !standalone) {
-        setTimeout(function() {
+        setTimeout(function () {
             var ov = document.getElementById("ios-overlay");
             if (ov) ov.classList.add("visible");
         }, 2800);
